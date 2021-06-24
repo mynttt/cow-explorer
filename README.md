@@ -1,7 +1,7 @@
 # Correlates of War - Militarized Interstate Dispute Locations Explorer
 
-- Marc Herschel
-- Marten Meinhardt
+- Marc Herschel ([https://github.com/mynttt](@mynttt))
+- Marten Meinhardt ([https://github.com/mMeinhardt](@mMeinhardt))
 
 ## Dataset
 
