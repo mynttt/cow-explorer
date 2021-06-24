@@ -1,3 +1,2 @@
-*.csv
 .idea/
 app/__pycache__
