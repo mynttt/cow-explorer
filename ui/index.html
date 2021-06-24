@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Correlates of War - Militarized Interstate Dispute Locations Explorer</title>
+    <style>
+        html,
+        body,
+        section {
+            height: 100%;
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        html {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+            overflow: -moz-scrollbars-none;
+        }
+
+        .container {
+            display: flex;
+            margin-left: unset !important;
+            width: auto !important;
+        }
+
+        #events {
+            max-height: 800px;
+            overflow: scroll;
+            overflow-x: hidden;
+            scrollbar-width: none;
+            border-bottom: 1px solid #ddd;
+            border-radius: 4px;
+            max-width: 550px;
+        }
+
+        .list-group-item {
+            width: 550px;
+        }
+
+        a {
+            color: #333 !important;
+        }
+
+        .well {
+            margin-top: 5px !important;
+            margin-bottom: unset !important;
+        }
+
+        .left-half {
+            flex: 1;
+            padding: 1rem;
+        }
+
+        .right-half {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex: 1;
+            padding: 1rem;
+            justify-content: unset !important;
+            margin-top: -27px;
+        }
+
+        body {
+            max-height: 820px !important;
+            font-family: "avenir next", Arial, sans-serif;
+            font-size: 12px;
+            color: #696969;
+        }
+
+        svg {
+            cursor: default !important;
+        }
+
+        .label-info {
+            background-color: aqua !important;
+            color: black !important;
+        }
+
+        .label-default {
+            background-color: black !important;
+        }
+
+        .label-warning {
+            color: black !important;
+        }
+
+        path {
+            stroke: white;
+            stroke-width: 0.5px;
+            fill: rgb(85, 82, 82);
+        }
+
+        #float-button-group {
+            position: absolute;
+            margin-top: 10px;
+            margin-left: 10px;
+            opacity: 0.5;
+        }
+
+        #float-button-group:hover {
+            opacity: 1;
+        }
+
+        sup:hover {
+            text-decoration: underline;
+        }
+
+        #map {
+            background: white;
+            width: 965px;
+            height: 505px;
+            border: 1px solid black;
+        }
+
+        .alert {
+            margin-bottom: 4px !important;
+        }
+
+        #states path {
+            fill: rgb(85, 82, 82);
+            stroke: #fff;
+        }
+
+        .ticks {
+            font-size: 10px;
+        }
+
+        .track,
+        .track-inset,
+        .track-overlay {
+            stroke-linecap: round;
+        }
+
+        .track {
+            stroke: #000;
+            stroke-opacity: 0.3;
+            stroke-width: 10px;
+        }
+
+        .track-inset {
+            stroke: #dcdcdc;
+            stroke-width: 8px;
+        }
+
+        .track-overlay {
+            pointer-events: stroke;
+            stroke-width: 50px;
+            stroke: transparent;
+        }
+
+        .alert-nodata {
+            color: white;
+            background-color: #7e7e7e;
+            border-color: #4d4d4d;
+        }
+
+        .handle {
+            fill: #fff;
+            stroke: #000;
+            stroke-opacity: 0.5;
+            stroke-width: 1.25px;
+        }
+
+        #play-button,
+        .toggle-legend {
+            background: #f08080;
+            padding-right: 26px;
+            border-radius: 3px;
+            border: none;
+            color: white;
+            margin: 0;
+            padding: 0 12px;
+            cursor: pointer;
+            height: 30px;
+            margin-top: 10px;
+        }
+
+        #play-button:hover,
+        .toggle-legend:hover {
+            background-color: #696969;
+        }
+
+        @keyframes highlight {
+            0% {
+                background: #a09e9e;
+            }
+
+            100% {
+                background: none;
+            }
+        }
+
+        .highlight {
+            animation: highlight 2s;
+        }
+
+        #tooltip {
+            background: white;
+            border: 1px solid black;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .info-span {
+            display: inline-block;
+            width: 28%;
+            margin-left: 20px;
+        }
+
+        .info-span span {
+            margin-left: 8px;
+            font-weight: bold;
+        }
+
+        #map-legend {
+            position: absolute;
+            border: 1px solid black;
+            margin-left: 10px;
+            margin-top: 356px;
+            opacity: 0.89;
+        }
+
+        #map-legend-lvl {
+            position: absolute;
+            border: 1px solid black;
+            margin-left: 798px;
+            margin-top: 387px;
+            opacity: 0.89;
+        }
+    </style>
+</head>
+
+<body style="margin-top: 20px; margin-left: 20px;">
+    <div id="tooltip" display="none" style="position: absolute; display: none;"></div>
+    <h1 style="padding-left: 0.6em;">Correlates of War - Militarized Interstate Dispute Locations Explorer</h1>
+    <section class="container">
+        <div class="left-half">
+            <div id="map">
+                <div class="btn-group-vertical" role="group" aria-label="..." id="float-button-group">
+                    <button type="button" class="btn btn-default" id="zoom-in"><span class="glyphicon glyphicon-zoom-in"
+                            aria-hidden="true"></span></button>
+                    <button type="button" class="btn btn-default" id="zoom-out"><span
+                            class="glyphicon glyphicon-zoom-out" aria-hidden="true"></span></button>
+                    <button type="button" class="btn btn-default" id="reset"><span
+                            class="glyphicon glyphicon-screenshot" aria-hidden="true"></span></button>
+                </div>
+                <div id="map-legend"></div>
+                <div id="map-legend-lvl"></div>
+            </div>
+            <div class="vis-container">
+                <button id="play-button">Play timeline automatically</button>
+                <button id="lgbd" class="toggle-legend" onclick="toggleLegend();">Hide legend</button>
+                <div id="vis"></div>
+            </div>
+            <div style="font-size: 24px; margin-top: 20px; margin-bottom: 10px; font-weight: 500; line-height: 1.1;">
+                <span class="info-span">Disputes: <span id="ex-d"></span></span>
+                <span class="info-span">Fatalities:<span id="ex-c"></span></span>
+                <span class="info-span">Involved Nations:<span id="ex-i"></span></span>
+            </div>
+        </div>
+        <div class="right-half">
+            <div class="info-container">
+                <h3 id="events-h">Events</h3>
+                <div class="list-group" id="events"></div>
+            </div>
+        </div>
+    </section>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.js">
+    </script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.css" />
+    <link rel="stylesheet" href="css/fontello.css" />
+    <script>
+        // SLIDER
+        var parseDate = d3.timeParse("%Y");
+        var formatDateIntoYear = d3.timeFormat("%Y");
+        var formatDate = d3.timeFormat("%b %Y");
+
+        var startDate = new Date("1810-01-01"),
+            endDate = new Date("2020-01-01");
+
+        var margin = {
+                top: 50,
+                right: 50,
+                bottom: 0,
+                left: 50
+            },
+            width = 960 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+        var histHeight = height / 5;
+        var dateArray = d3.timeYears(startDate, d3.timeYear.offset(endDate, 1));
+
+        var colours = d3.scaleLinear().domain([3, 97, 456]).range(["green", "orange", "red"]);
+        var cinc_color_code = d3.scaleSequential(d3.interpolateRdYlGn).domain([0,0.1986]);
+
+        var moving = false;
+        var currentValue = 0;
+        var targetValue = width;
+
+        var playButton = d3.select("#play-button");
+
+        var x = d3.scaleTime().domain([startDate, endDate]).range([0, targetValue]).clamp(true);
+        var y = d3.scaleLinear().range([60, 0]);
+
+        // map legend
+
+        var legendSvg = d3
+            .select("#map-legend")
+            .append("svg")
+            .attr("style", "margin-bottom: -5.5px;")
+            .attr("width", width / 9.7)
+            .attr("height", height / 3.2);
+
+        var legendSvgHost = d3
+            .select("#map-legend-lvl")
+            .append("svg")
+            .attr("style", "margin-bottom: -5.5px;")
+            .attr("width", width / 5.5)
+            .attr("height", height / 4.1);
+
+        // hist
+
+        var histogram = d3
+            .histogram()
+            .value(function (d) {
+                return d.date;
+            })
+            .domain(x.domain())
+            .thresholds(x.ticks(20));
+
+        var svg = d3
+            .select("#vis")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height - 300 + margin.top + margin.bottom);
+
+        svg.append("text").text("Histogram Buckets: Disputes / 10 years").attr("y", 40).attr("style",
+            "font-style: italic;").attr("x", 50);
+
+        var hist = svg
+            .append("g")
+            .attr("class", "histogram")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var plot = svg
+            .append("g")
+            .attr("class", "plot")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        function prepare(d) {
+            d.date = parseDate(d.date);
+            d.value = +d.value;
+            return d;
+        }
+
+        d3.csv("hist_war.csv", prepare, function (data) {
+            var bins = histogram(data);
+
+            y.domain([
+                0,
+                d3.max(bins, function (d) {
+                    return d.length;
+                }),
+            ]);
+
+            var bar = hist
+                .selectAll(".bar")
+                .data(bins)
+                .enter()
+                .append("g")
+                .attr("class", "bar")
+                .attr("transform", function (d) {
+                    return "translate(" + x(d.x0) + "," + y(d.length) + ")";
+                });
+
+            bar.append("rect")
+                .attr("class", "bar")
+                .attr("x", 1)
+                .attr("width", function (d) {
+                    return x(d.x1) - x(d.x0) - 1;
+                })
+                .attr("height", function (d) {
+                    return histHeight - y(d.length);
+                })
+                .attr("fill", function (d) {
+                    return colours(d.length);
+                });
+
+            bar.append("text")
+                .attr("dy", ".75em")
+                .attr("y", "6")
+                .attr("x", function (d) {
+                    return (x(d.x1) - x(d.x0)) / 2;
+                })
+                .attr("text-anchor", "middle")
+                .text(function (d) {
+                    if (d.length > 0) {
+                        return d.length;
+                    }
+                })
+                .style("fill", "white");
+        });
+
+        // slider
+
+        var slider = svg
+            .append("g")
+            .attr("class", "slider")
+            .attr("transform", "translate(" + margin.left + "," + (margin.top + histHeight + 5) + ")");
+
+        slider
+            .append("line")
+            .attr("class", "track")
+            .attr("x1", x.range()[0])
+            .attr("x2", x.range()[1])
+            .select(function () {
+                return this.parentNode.appendChild(this.cloneNode(true));
+            })
+            .attr("class", "track-inset")
+            .select(function () {
+                return this.parentNode.appendChild(this.cloneNode(true));
+            })
+            .attr("class", "track-overlay")
+            .call(
+                d3
+                .drag()
+                .on("start.interrupt", function () {
+                    slider.interrupt();
+                })
+                .on("start drag", function () {
+                    currentValue = d3.event.x;
+                    update(x.invert(currentValue));
+                })
+            );
+
+        slider
+            .insert("g", ".track-overlay")
+            .attr("class", "ticks")
+            .attr("transform", "translate(0," + 18 + ")")
+            .selectAll("text")
+            .data(x.ticks(10))
+            .enter()
+            .append("text")
+            .attr("x", x)
+            .attr("y", 10)
+            .attr("text-anchor", "middle")
+            .text(function (d) {
+                return formatDateIntoYear(d);
+            });
+
+        var handle = slider.insert("circle", ".track-overlay").attr("class", "handle").attr("r", 9);
+
+        var label = slider.append("text").attr("class", "label").attr("text-anchor", "middle").text(formatDate(
+            startDate)).attr("transform", "translate(0,50)");
+
+        playButton.on("click", function () {
+            var button = d3.select(this);
+            if (button.text() == "Pause timeline playing") {
+                moving = false;
+                clearInterval(timer);
+                button.text("Play timeline automatically");
+            } else {
+                moving = true;
+                timer = setInterval(function () {
+                    update(x.invert(currentValue));
+                    currentValue = currentValue + targetValue / 600;
+                    if (currentValue > targetValue) {
+                        moving = false;
+                        currentValue = 0;
+                        clearInterval(timer);
+                        playButton.text("Play timeline automatically");
+                    }
+                }, 100);
+                button.text("Pause timeline playing");
+            }
+        });
+
+        // MAP
+
+        var width = d3.select("#map").node().getBoundingClientRect().width,
+            height = d3.select("#map").node().getBoundingClientRect().height;
+
+        var center = [width / 2, height / 2];
+
+        var projection = d3.geoEquirectangular().center([0, 10]);
+
+        var svg = d3.select("#map").append("svg").attr("width", width).attr("height", height);
+
+        var path = d3.geoPath().projection(projection);
+
+        var circleRadius = 5;
+        var g;
+        var lastTransform;
+
+        d3.json("world-countries.json", function (collection) {
+            svg.selectAll("path")
+                .data(collection.features)
+                .enter()
+                .append("svg:path")
+                .attr("d", path)
+                .attr("id", function (d) {
+                    return "c-" + d.id;
+                })
+                .on("mouseover", function (d) {
+                    d3.select(this).style("fill", "#ccc").append("svg:title").text(d.properties.name);
+                })
+                .on("mouseout", function (d) {
+                    d3.select(this).style("fill", "rgb(85, 82, 82");
+                });
+        });
+
+        var zoom = d3
+            .zoom()
+            .scaleExtent([1, 10])
+            .on("zoom", function () {
+                svg.selectAll("path").attr("transform", d3.event.transform);
+                g.selectAll("circle")
+                    .attr("transform", d3.event.transform)
+                    .attr("stroke-width", 1 / d3.event.transform.k)
+                    .attr("onmouseover", function (d) {
+                        return "evt.target.setAttribute('r', '" + (getRadius(d.fatality, d.fatalpre) * 1.5) / d3
+                            .event.transform.k + "');showTooltip(evt, '" + d.midloc2_location + "');";
+                    })
+                    .attr("onmouseout", function (d) {
+                        return "evt.target.setAttribute('r', '" + getRadius(d.fatality, d.fatalpre) / d3.event
+                            .transform.k + "');hideTooltip();";
+                    })
+                    .attr("r", function (d) {
+                        return getRadius(d.fatality, d.fatalpre) / d3.event.transform.k;
+                    });
+                lastTransform = d3.event.transform;
+            });
+
+        svg.call(zoom);
+        update(startDate);
+
+        // FUNCTIONS
+
+        function update(h) {
+            handle.attr("cx", x(h));
+            label.attr("x", x(h)).text(formatDate(h));
+
+            render(h);
+
+            d3.selectAll(".bar").attr("fill", function (d) {
+                if (d.x0 < h) {
+                    return colours(d.length);
+                } else {
+                    return "#eaeaea";
+                }
+            });
+        }
+
+        var scaleFactor = 2;
+        var scaleLen = 5;
+        var scaleBase = 6;
+        var scaled = [];
+
+        for (i = 0; i < scaleLen; i++) {
+            scaled.push(scaleBase + i * scaleFactor);
+        }
+
+        cx = 16;
+        cy = 28;
+
+        legendSvg.append("rect").attr("fill", "white").attr("width", "100%").attr("height", "100%");
+
+        legendSvg.append("text").attr("x", 20).attr("y", 13).text("Fatalities").attr("style",
+            "font-size: small;text-decoration: underline;");
+
+        fatality_counts = ["0 / ?", "1-101", "101-251", "251-500", "> 500"];
+        fatality_offset_x = [59, 51, 37, 37, 42];
+        fatality_offset_y = [34, 53, 74, 98, 128];
+
+        for (i = 0; i < scaled.length; i++) {
+            legendSvg.append("text").text(fatality_counts[i]).attr("x", fatality_offset_x[i]).attr("style",
+                "font-size: small; font-weight: bold;").attr("y", fatality_offset_y[i]);
+
+            legendSvg.append("circle").attr("cx", cx).attr("cy", cy).attr("fill", "white").attr("stroke", "black").attr(
+                "stroke-width", 1).attr("r", scaled[i]);
+            cx += scaled[i] / 20;
+            cy += scaled[i] * 1.9 + 7;
+        }
+
+        legendSvgHost.append("rect").attr("fill", "white").attr("width", "100%").attr("height", "100%");
+        legendSvgHost.append("text").attr("x", 39).attr("y", 13).text("Hostility Level").attr("style",
+            "font-size: small; text-decoration: underline;");
+
+        var hostLvlSvgs = [{
+                t: "Unknown",
+                c: "white"
+            },
+            {
+                t: "No Militarized Action",
+                c: "#5cb85c"
+            },
+            {
+                t: "Threat to use Force",
+                c: "aqua"
+            },
+            {
+                t: "Display of Force",
+                c: "blue"
+            },
+            {
+                t: "Use of Force",
+                c: "orange"
+            },
+            {
+                t: "War",
+                c: "red"
+            },
+        ];
+
+        for (i = 0; i < hostLvlSvgs.length; i++) {
+            legendSvgHost
+                .append("rect")
+                .attr("width", 18)
+                .attr("height", 10)
+                .attr("x", 6)
+                .attr("y", 20 + i * 15)
+                .attr("stroke", "black")
+                .attr("stroke-width", 1)
+                .attr("fill", hostLvlSvgs[i].c);
+
+            legendSvgHost
+                .append("text")
+                .text(hostLvlSvgs[i].t)
+                .attr("x", 30)
+                .attr("style", "font-size: 11px; font-weight: bold;")
+                .attr("y", 20 + 9 + i * 15);
+        }
+
+        function render(date) {
+            var url = "http://localhost:5000/poi?year=" + date.getFullYear() + "&month=" + (date.getMonth() + 1) +
+                "&day=" + date.getDate();
+            document.getElementById("events-h").innerHTML = "Events for " + date.getDate() + ". " + getMonthName(date
+                .getMonth() + 1) + " " + date.getFullYear();
+
+            d3.json(url, function (err, data) {
+                // TODO: Only use this for debug purpose.
+                // console.log(data);
+
+                updateEvents(data);
+
+                f = function (d) {
+                    return getRadius(d.fatality, d.fatalpre);
+                };
+
+                data_sorted = data["data"].sort(function (a, b) {
+                    r_a = getRadius(a.fatality, a.fatalpre);
+                    r_b = getRadius(b.fatality, b.fatalpre);
+                    if (r_a > r_b) return -1;
+                    if (r_a < r_b) return 1;
+                    return 0;
+                });
+
+                f2 = function (d) {
+                    r = f(d);
+                    return lastTransform == null ? r : r / lastTransform.k;
+                };
+
+                svg.selectAll("g").remove();
+                g = svg.append("g");
+                g.selectAll("circle")
+                    .data(data["data"])
+                    .enter()
+                    .append("circle")
+                    .attr("cx", function (d) {
+                        return projection([d.midloc2_xlongitude, d.midloc2_ylatitude])[0];
+                    })
+                    .attr("cy", function (d) {
+                        return projection([d.midloc2_xlongitude, d.midloc2_ylatitude])[1];
+                    })
+                    .style("fill", function (d) {
+                        return getColorCode(d.hostlev);
+                    })
+                    .style("opacity", 0.7)
+                    .attr("stroke", "black")
+                    .attr("onclick", function (d) {
+                        return "scrollIntoIt('" + d.dispnum + "');";
+                    })
+                    .attr("stroke-width", lastTransform == null ? 1 : 1 / lastTransform.k)
+                    .attr("onmouseover", function (d) {
+                        return "evt.target.setAttribute('r', '" + f2(d) * 1.5 + "');showTooltip(evt, '" + d
+                            .midloc2_location + "');";
+                    })
+                    .attr("onmouseout", function (d) {
+                        return "evt.target.setAttribute('r', '" + f2(d) + "');hideTooltip();";
+                    })
+                    .attr("r", f2)
+                    .transition()
+                    .duration(moving ? 100 : 400)
+                    .attr("r", function (d) {
+                        return f2(d) * (moving ? 1.1 : 2);
+                    })
+                    .transition()
+                    .attr("r", f2);
+
+                if (lastTransform != null) {
+                    g.selectAll("circle").attr("transform", lastTransform);
+                }
+            });
+        }
+
+        function scrollIntoIt(dispnum) {
+            document.getElementById("dt-" + dispnum).scrollIntoView({
+                block: "end",
+                behavior: "smooth"
+            });
+            $("#dt-" + dispnum).addClass("highlight");
+            setTimeout(function () {
+                $("#dt-" + dispnum).removeClass("highlight");
+            }, 2000);
+        }
+
+        function getMonthName(month) {
+            var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
+                "October", "November", "December"
+            ];
+            return months[month - 1];
+        }
+
+        var hostLvlColorCode = ["#5cb85c", "aqua", "blue", "orange", "red"];
+
+        function getRadius(fatal, fatalpre) {
+            if (fatalpre > 500) {
+                return scaled[4];
+            }
+
+            if (fatal == 0) {
+                return scaled[0];
+            }
+            if (fatal == 1 || fatal == 2) {
+                return scaled[1];
+            }
+            if (fatal == 3) {
+                return scaled[2];
+            }
+            if (fatal == 4) {
+                return scaled[3];
+            }
+            if (fatal >= 5) {
+                return scaled[4];
+            }
+
+            return scaled[0];
+        }
+
+        function getColorCode(threatLvl) {
+            if (threatLvl >= 1 && threatLvl <= 5) {
+                return hostLvlColorCode[threatLvl - 1];
+            }
+
+            return "white";
+        }
+
+        var hostLvl = [
+            '<span class="label label-success">No Militarized Action</span>',
+            '<span class="label label-info">Threat to use Force</span>',
+            '<span class="label label-primary">Display of Force</span>',
+            '<span class="label label-warning">Use of Force</span>',
+            '<span class="label label-danger">War</span>',
+        ];
+
+        function getHostLevel(level, ignoreUnknown) {
+            if (level > 1 && level <= 5) {
+                return hostLvl[level - 1];
+            }
+            return ignoreUnknown ? "" : '<span class="label label-default">Unknown Hostility Level</span>';
+        }
+
+        function getRecep(recep) {
+            if (recep == 2) {
+                return '<span class="label label-danger">Reciprocation</span>';
+            } else {
+                return "";
+            }
+        }
+
+        var hiact = [
+            "No Militarized Action",
+            "Threat to Use Force",
+            "Threat to Blockade",
+            "Threat to Occupy Territory",
+            "Threat to Declare War",
+            "Threat to Use CBR Weapons",
+            "Threat to Join War",
+            "Show of Force",
+            "Military Alert",
+            "Nuclear Alert",
+            "Mobilization of Troops",
+            "Border Fortification",
+            "Border Violation",
+            "Blockade of Area",
+            "Occupation of Territory",
+            "Asset Seizure",
+            "Attack",
+            "Clash",
+            "Declaration of War",
+            "Use of CBR Weapons",
+            "Begin Interstate War",
+            "Join Interstate War",
+        ];
+
+        function getHighAct(ha, ignoreUnknown) {
+            if (ha > 0 && ha <= 21) {
+                var s = hiact[ha];
+                if (ha == 0) {
+                    return '<span class="label label-success">' + s + "</span>";
+                }
+                if (ha >= 1 && ha <= 6) {
+                    return '<span class="label label-info">' + s + "</span>";
+                }
+                if (ha >= 7 && ha <= 12) {
+                    return '<span class="label label-primary">' + s + "</span>";
+                }
+                if (ha >= 13 && ha <= 19) {
+                    return '<span class="label label-warning">' + s + "</span>";
+                }
+                if (ha == 20 || ha == 21) {
+                    return '<span class="label label-danger">' + s + "</span>";
+                }
+            }
+            return ignoreUnknown ? "" : '<span class="label label-default">Unknown Escalation Level</span>';
+        }
+
+        var settled = [
+            '<span class="label label-success">Negotiated Settlement</span>',
+            '<span class="label label-danger">Imposed Settlement</span>',
+            '<span class="label label-warning">No Settlement</span>',
+            '<span class="label label-primary">Unclear Settlement</span>',
+        ];
+
+        function getSettle(settle) {
+            if (settle > 1 && settle <= 4) {
+                return settled[settle - 1];
+            }
+            return "";
+        }
+
+        function getOutcome(partic, e) {
+            side_a = new Set();
+            side_b = new Set();
+
+            partic.forEach((p) => {
+                if (p.sidea == 1) {
+                    side_a.add(p.name_cow);
+                } else {
+                    side_b.add(p.name_cow);
+                }
+            });
+
+            side_a = Array.from(side_a).sort();
+            side_b = Array.from(side_b).sort();
+
+            out = e.outcome;
+
+            if (out == 1 || out == 2) {
+                a_win = out == 1;
+                multiple_winners = a_win ? side_a.length > 1 : side_b.length > 1;
+
+                if (multiple_winners) {
+                    html = [
+                        '<div class="alert alert-success">Victory has been declared by:<ul style="margin-top:5px; list-style-type:disclosure-closed; margin-left: -15px;">'];
+                    itter = a_win ? side_a : side_b;
+                    itter.forEach((v) => {
+                        html.push("<li><b>" + v + "</b></li>");
+                    });
+                    html.push("</ul></div>");
+                    return html.join("");
+                } else {
+                    return '<div class="alert alert-success">Victory has been declared by <b>' + (a_win ? side_a[0] :
+                        side_b[0]) + "</b>.</div>";
+                }
+            }
+
+            if (out == 3 || out == 4) {
+                a_yield = out == 3;
+                multiple_yielders = a_yield ? side_a.length > 1 : side_b.length > 1;
+
+                if (multiple_yielders) {
+                    html = [
+                        '<div class="alert alert-danger">Yield has been declared by:<ul style="margin-top:5px; list-style-type:disclosure-closed; margin-left: -15px;">'];
+                    itter = a_yield ? side_a : side_b;
+                    itter.forEach((v) => {
+                        html.push("<li><b>" + v + "</b></li>");
+                    });
+                    html.push("</ul></div>");
+                    return html.join("");
+                } else {
+                    return '<div class="alert alert-danger">Yield has been declared by <b>' + (a_yield ? side_a[0] :
+                        side_b[0]) + "</b>.</div>";
+                }
+            }
+
+            if (out == 5) {
+                return '<div class="alert alert-warning">Conflict has run stale and has not been resolved.</div>';
+            }
+
+            if (out == 6) {
+                return '<div class="alert alert-success">A compromise has been found to settle the situation.</div>';
+            }
+
+            if (out == 7) {
+                return '<div class="alert alert-success">The seizure of assets has been handled by release.</div>';
+            }
+
+            if (out == 8) {
+                return '<div class="alert alert-info" role="alert">The outcome is unclear and has yet to be defined by historians.</div>';
+            }
+
+            return '<div class="alert alert-nodata" role="alert">No data available to determine an outcome.</div>';
+        }
+
+        f_map = ["No Fatalities Recorded", "1 &rarr; 25 fatalities recorded", "26 &rarr; 100 fatalities recorded",
+            "101 &rarr; 250 fatalities recorded", "251 &rarr; 500 fatalities recorded",
+            "501 &rarr; 999 fatalities recorded", "> 999 fatalities recorded"
+        ];
+
+        function getFatalities(fatal, fatalpre) {
+            if (fatalpre != -9) {
+                return fatalpre == 1 ? "1 fatality recorded" : fatalpre == 0 ? "No fatalities recorded" : fatalpre +
+                    " fatalities recorded";
+            }
+            if (fatal >= 0 && fatal <= 6) {
+                return f_map[fatal];
+            }
+            return "Unknown fatality count";
+        }
+
+        function updateEvents(data) {
+            var events = document.getElementById("events");
+            events.innerHTML =
+                '<div class="list-group-item" style="text-alignment: center;"><h3 class="list-group-item-heading"><span class="glyphicon glyphicon-minus-sign" style="margin-right: 10px;"></span>No events emitted!</h3></div>';
+            var html = [];
+
+            document.getElementById("ex-d").innerHTML = data["extra"]["disputes"];
+            document.getElementById("ex-i").innerHTML = data["extra"]["nations"];
+            document.getElementById("ex-c").innerHTML = data["extra"]["casualties"];
+
+            data["data"].forEach((e) => {
+                html.push(`
+                    <div class="list-group-item" id="dt-${e.dispnum}">
+                        <p>${getHostLevel(e.hostlev, false)} ${getHighAct(e.hiact, false)} ${getRecep(e.recip)} ${getSettle(e.settle)} </p><h4 class="list-group-item-heading"><a href="javascript:zoomTo(${e.midloc2_xlongitude},${
+                        e.midloc2_ylatitude
+                    });">${e.midloc2_location}</a></h4>
+                        <p><span class="glyphicon glyphicon-time" style="margin-right: 5px;"></span>${e.stday}. ${getMonthName(e.stmon)} ${e.styear} &rarr; ${e.endday}. ${getMonthName(e.endmon)} ${e.endyear}</p>
+                        <p style="margin-top: -4px;"><i class="icon-fatality" style="margin-right: 5px;"></i>${getFatalities(e.fatality, e.fatalpre)}</p>
+                        ${getOutcome(data["partic"][e.dispnum], e)}
+                        <p style="margin-top: 10px; margin-bottom: 0px;"><a class="" onclick="switchName('cl-${e.dispnum}');" id="cl-${e.dispnum}" role="button" data-toggle="collapse" href="#${
+                        e.dispnum
+                    }" aria-expanded="false" aria-controls="${e.dispnum}"><span style="margin-right: 5px;" class="glyphicon glyphicon-info-sign"></span>View detailed data of all participants</a></p>
+                        <div class="collapse" id="${e.dispnum}">
+                            <div class="well">
+                                ${renderNar(data["nar"][e.dispnum])}
+                                ${listParticipantes(data["partic"][e.dispnum], true, e.outcome, data["cinc_data"])}
+                                ${listParticipantes(data["partic"][e.dispnum], false, e.outcome, data["cinc_data"])}
+                            </div>
+                        </div>
+                    </div>
+                    `);
+            });
+
+            if (html.length > 0) {
+                events.innerHTML = html.join("");
+            }
+        }
+
+        function renderNar(nar) {
+            if (typeof nar == "undefined") {
+                return "";
+            }
+            return "<textarea style='width:100%;height:150px;text-align:justify;resize:none;' readonly>"+nar+"</textarea>";
+        }
+
+        function determineSideSpan(sideA, outcome) {
+            if (outcome == 1) {
+                return sideA ? ' - <span style="color: #3c763d;">Victory!</span>' :
+                    ' - <span style="color: #d9534f;">Defeat!</span>';
+            }
+            if (outcome == 2) {
+                return !sideA ? ' - <span style="color: #3c763d;">Victory!</span>' :
+                    ' - <span style="color: #d9534f;">Defeat!</span>';
+            }
+            if (outcome == 3) {
+                return sideA ? ' - <span style="color: #d9534f;">Yield!</span>' :
+                    ' - <span style="color: #3c763d;">Victory!</span>';
+            }
+            if (outcome == 4) {
+                return !sideA ? ' - <span style="color: #d9534f;">Yield!</span>' :
+                    ' - <span style="color: #3c763d;">Victory!</span>';
+            }
+            return "";
+        }
+
+        var cinc_cache = {}
+
+        function listParticipantes(data, sideA, outcome, cinc_data) {
+            cinc_cache = cinc_data;
+            html = [];
+            side_t = sideA ? "1" : "0";
+
+            html.push(`<center><h3>Side ${sideA ? "A" : "B"} ${determineSideSpan(sideA, outcome)}</h3></center>`);
+
+            data.sort(function (d1, d2) {
+                if (d1.name_cow < d2.name_cow) {
+                    return -1;
+                }
+                if (d1.name_cow > d2.name_cow) {
+                    return 1;
+                }
+                return 0;
+            });
+
+            data.forEach((e) => {
+                if (side_t == e.sidea) {
+                    country = cinc_data[e.ccode];
+                    cinc = 0;
+                    cinc_exists = false;
+
+                    if (typeof country != "undefined") {
+                        cinc = country["cinc"];
+                        cinc = cinc < 0 ? 0 : cinc;
+                        cinc_exists = true;
+                    }
+                    html.push(`
+                    <div style="margin-top: 4px; border: 1px solid #ddd; border-radius: 4px; padding: 8px; background: white;">
+                        <div><img style="max-width: 32px;margin-right: 5px;" src="flags/${search_country_wrapped(e.iso_code)}">${e.name_cow}<span style="float:right; margin-top: 5px;">${getRightDate(
+                            e.stday,
+                            e.stmon,
+                            e.styear
+                        )} &rarr; ${getRightDate(e.endday, e.endmon, e.endyear)}</span></div>
+                        <div><span style="float:right;">${getHostLevel(e.hostlev, true)} ${getHighAct(
+                            e.hiact,
+                            true
+                        )}</span>
+                        </p><i class="icon-fatality"></i> ${getFatalities(e.fatality, e.fatalpre)}</p>${getCinc(cinc_exists, cinc, e)}
+                        </div>
+                    </div>
+                    `);
+                }
+            });
+
+            return html.join("");
+        }
+
+        function getCinc(cinc_exists, cinc, e) {
+            if(!cinc_exists) return "";
+            var id = uuid().substr(0, 6);
+            return `<i class="icon-cinc"></i> CINC <sup style="color: blue" title="${get_cinc_info()}">[?]</sup>: <span style="color: ${cinc_color_code(cinc)}">${cinc}</span>
+                        <a id="${id}" style="color: blue" onclick="display_details_cinc('${id}', '${e.ccode}')" href="#"> (View Details)</a>`
+        }
+
+        function display_details_cinc(id, ccode) {
+            data = cinc_cache[ccode];
+            var elem = document.getElementById(id);
+            nfObject = new Intl.NumberFormat('en-US')
+            if (elem.innerText == "(View Details)") {
+                elem.innerText =
+                    ' (Hide Details)';
+                elem.insertAdjacentHTML("afterend", `</p>
+                <div id="${data.tpop}${data.upop}${data.irst}${data.milper}${data.milex}${data. pec}"><i class="icon-population"></i> Total population: ${nfObject.format(data.tpop * 1000)} 
+                    </p> <i class="icon-urban-population"></i> Urban population: ${nfObject.format(data.upop * 1000)} 
+                    </p> <i class="icon-steel"></i> Iron and steel production: ${nfObject.format(data.irst * 1000)} ${cinc_unit_desc.steel}
+                    </p> <i class="icon-military"></i> Military personnel: ${nfObject.format(data.milper * 1000)} 
+                    </p> <i class="icon-money"></i> Military expenditure: ${nfObject.format(data.milex * 1000)} ${cinc_unit_desc.milex} 
+                    </p> <i class="icon-energy"></i> Energy consumption: ${nfObject.format(data. pec * 1000)} ${cinc_unit_desc.energy}</p>`);
+            } else {
+                elem.innerText =
+                    ' (View Details)';
+                    document.getElementById(`${data.tpop}${data.upop}${data.irst}${data.milper}${data.milex}${data. pec}`).remove();
+            }
+        }
+
+        cinc_unit_desc = {steel: "tons",
+            milex: "US-Dollars",
+            energy: "coal-ton equivalents"
+        }
+
+        function get_cinc_info() {
+            return "The CINC (Composite Index of National Capability) is a statistical measure of national military power. It is calculated from the total population, military personnel, military expenditure as well as total steel and iron production and energy consumption of a country. Each component is a dimensionless percentage of the world's total."
+        }
+
+        function getRightDate(day, mon, year) {
+            isDay = day >= 1 && day <= 31;
+            isMonth = mon >= 1 && mon <= 12;
+            return (isDay ? day + ". " : "") + (isMonth ? getMonthName(mon).substr(0, 3) + ". " : "") + year;
+        }
+
+        // ZOOM
+        function switchName(id) {
+            elm = document.getElementById(id);
+            if (elm.innerText == "View detailed data of all participants") {
+                elm.innerHTML =
+                    '<span style="margin-right: 5px;" class="glyphicon glyphicon-info-sign"></span>Hide detailed data of all participants';
+            } else {
+                elm.innerHTML =
+                    '<span style="margin-right: 5px;" class="glyphicon glyphicon-info-sign"></span>View detailed data of all participants';
+            }
+        }
+
+        function zoomTo(long, lat) {
+            var point = projection([long, lat]);
+            zoom.scaleTo(svg.transition().duration(0), 10);
+            zoom.translateTo(svg.transition().duration(250), point[0], point[1]);
+        }
+
+        d3.select("#zoom-in").on("click", function () {
+            zoom.scaleBy(svg.transition().duration(750), 1.5);
+        });
+
+        d3.select("#zoom-out").on("click", function () {
+            zoom.scaleBy(svg.transition().duration(750), 0.65);
+        });
+
+        d3.select("#reset").on("click", function () {
+            zoom.transform(svg.transition().duration(750), d3.zoomIdentity.scale(1));
+        });
+
+        // Support
+        function showTooltip(evt, text) {
+            let tooltip = document.getElementById("tooltip");
+            tooltip.innerHTML = text;
+            tooltip.style.display = "block";
+            tooltip.style.left = evt.pageX + 5 + "px";
+            tooltip.style.top = evt.pageY + 5 + "px";
+        }
+
+        function hideTooltip() {
+            var tooltip = document.getElementById("tooltip");
+            tooltip.style.display = "none";
+        }
+
+        legendShown = true;
+
+        function toggleLegend() {
+            legendShown = !legendShown;
+            document.getElementById("map-legend").style.display = legendShown ? "initial" : "none";
+            document.getElementById("map-legend-lvl").style.display = legendShown ? "initial" : "none";
+            document.getElementById("lgbd").textContent = legendShown ? "Hide legend" : "Show legend";
+        }
+
+        // https://github.com/stefangabos/world_countries
+
+        var countries;
+
+        $.getJSON("world.json", function (json) {
+            countries = json;
+        });
+
+        function search_country_wrapped(country) {
+            if (country == null) return "_.png";
+            result = search_country({
+                alpha3: country
+            });
+            if (result == null) return "_.png";
+            return result.alpha2 + ".png";
+        }
+
+        function uuid(){
+           var chars = '0123456789abcdef'.split('');
+           var uuid = [], rnd = Math.random, r;
+           uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+           uuid[14] = '4'; // version 4
+
+           for (var i = 0; i < 36; i++)
+           {
+              if (!uuid[i])
+              {
+                 r = 0 | rnd()*16;
+
+                 uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r & 0xf];
+              }
+           }
+
+           return uuid.join('');
+        }
+
+        function search_country(query) {
+            if (undefined === query.id && undefined === query.alpha2 && undefined === query.alpha3) return undefined;
+            return countries
+                .filter(function (country) {
+                    return (
+                        (undefined !== query.id && parseInt(country.id, 10) === parseInt(query.id, 10)) ||
+                        (undefined !== query.alpha2 && country.alpha2 === query.alpha2.toLowerCase()) ||
+                        (undefined !== query.alpha3 && country.alpha3 === query.alpha3.toLowerCase())
+                    );
+                })
+                .pop();
+        }
+    </script>
+</body>
+
+</html>
