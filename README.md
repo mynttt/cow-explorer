@@ -1,5 +1,8 @@
 # Correlates of War - Militarized Interstate Dispute Locations Explorer
 
+A visualization of the [Correlates of War Militarized Interstate Dispute Locations v2.1](https://correlatesofwar.org/data-sets/MIDLOC) dataset using d3js, Flask and SQLite3.
+
+
 - Marc Herschel ([@mynttt](https://github.com/mynttt))
 - Marten Meinhardt ([@mMeinhardt](https://github.com/mMeinhardt))
 
