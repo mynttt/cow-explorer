@@ -1,6 +1,6 @@
 # Correlates of War - Militarized Interstate Dispute Locations Explorer
 
-<img src="https://raw.githubusercontent.com/mynttt/cow-explorer/main/img.PNG" height="550">
+<img src="https://raw.githubusercontent.com/mynttt/cow-explorer/main/img.PNG" height="500">
 
 A visualization of the [Correlates of War Militarized Interstate Dispute Locations v2.1](https://correlatesofwar.org/data-sets/MIDLOC) dataset using d3js, Flask and SQLite3.
 
