@@ -23,8 +23,8 @@ The Correlates of War[3] dataset has been used. Conflict locations are visualize
 - Hidden, to not flood the user with informations, are stats of the participating countries ordered by on which side they participated in of the conflict. These hierarchical sub entries contain the flag of the country, the hostility level and highest act of force and (if available) the CINC (Composite Indicator of National Capability) [12] value. This value is color coded linarly from 0 to the highest value in our dataset i.e. red for low and green for high. The CINC can also be extended to display more detailled facts about the population, military strength, iron and steel production and military expenses. To get information regarding the CINC, the mouse can be hovered over the small blue questionmark next to the CINC label. Doing so will render a tooltip, explaining the CINC-Value.
 
 ## Requirements
-- Python 3 with version 3.6.13 or greater
-- Requirements within the api/requirements.txt installed via PIP 3
+- Python 3 with version 3.7 or greater
+- Requirements: `Flask` and `flask-cors`
 - Modern Internet browser i.e. Mozilla Firefox or Google Chrome
 
 ## How to run
